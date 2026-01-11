@@ -1,0 +1,12 @@
+name: Autograde TP Test conditionnel
+
+
+on: [push]
+
+jobs:
+  autograde:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "autograde placeholder"
+
