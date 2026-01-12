@@ -1,8 +1,8 @@
 name: Autograding Tests
 
 on:
-  push:
-  repository_dispatch:
+  - push
+  - repository_dispatch
 
 permissions:
   checks: write
@@ -18,59 +18,57 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Q1 Compilation unique
-      - name: Q1 - Compilation
+      - name: Compilation
         id: compilation
         uses: classroom-resources/autograding-command-grader@v1
         with:
-          test-name: "Compilation"
+          test-name: Compilation
           command: gcc -std=c99 -Wall -Wextra main.c -o prog
           timeout: 10
           max-score: 2
 
-      # Q2 Test valeur positive
-      - name: Q2 - Valeur positive
-        id: q2-positif
+      - name: Test positif
+        id: q1_positif
         uses: classroom-resources/autograding-command-grader@v1
         with:
-          test-name: "Valeur positive"
+          test-name: Valeur strictement positive
           command: |
-            result=$(echo 5 | ./prog | tr -d '\r\n ')
+            gcc -std=c99 -Wall -Wextra main.c -o prog &&
+            result=$(echo 5 | ./prog | tr -d '\r\n ') &&
             [ "$result" = "POSITIF" ]
           timeout: 10
           max-score: 4
 
-      # Q3 Test valeur négative
-      - name: Q3 - Valeur négative
-        id: q3-negatif
+      - name: Test negatif
+        id: q2_negatif
         uses: classroom-resources/autograding-command-grader@v1
         with:
-          test-name: "Valeur négative"
+          test-name: Valeur strictement negative
           command: |
-            result=$(echo -3 | ./prog | tr -d '\r\n ')
+            gcc -std=c99 -Wall -Wextra main.c -o prog &&
+            result=$(echo -3 | ./prog | tr -d '\r\n ') &&
             [ "$result" = "NEGATIF" ]
           timeout: 10
           max-score: 4
 
-      # Q4 Test valeur nulle
-      - name: Q4 - Valeur nulle
-        id: q4-nul
+      - name: Test nul
+        id: q3_nul
         uses: classroom-resources/autograding-command-grader@v1
         with:
-          test-name: "Valeur nulle"
+          test-name: Valeur nulle
           command: |
-            result=$(echo 0 | ./prog | tr -d '\r\n ')
+            gcc -std=c99 -Wall -Wextra main.c -o prog &&
+            result=$(echo 0 | ./prog | tr -d '\r\n ') &&
             [ "$result" = "POSITIF" ]
           timeout: 10
           max-score: 2
 
-      # Reporter
       - name: Autograding Reporter
         uses: classroom-resources/autograding-grading-reporter@v1
         env:
-          Q1_COMPILATION_RESULTS: "${{ steps.compilation.outputs.result }}"
-          Q2_POSITIF_RESULTS: "${{ steps.q1-positif.outputs.result }}"
-          Q3_NEGATIF_RESULTS: "${{ steps.q2-negatif.outputs.result }}"
-          Q4_NUL_RESULTS: "${{ steps.q3-nul.outputs.result }}"
+          COMPILATION_RESULTS: ${{ steps.compilation.outputs.result }}
+          Q1_POSITIF_RESULTS: ${{ steps.q1_positif.outputs.result }}
+          Q2_NEGATIF_RESULTS: ${{ steps.q2_negatif.outputs.result }}
+          Q3_NUL_RESULTS: ${{ steps.q3_nul.outputs.result }}
         with:
-          runners: compilation,q1-positif,q2-negatif,q3-nul
+          runners: compilation,q1_positif,q2_negatif,q3_nul
